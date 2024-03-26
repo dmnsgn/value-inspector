@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>value-inspector by Damien Seguin (https://github.com/dmnsgn)</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css"
+    />
+    <style>
+      :root {
+        --color-dark: #404040;
+        --color-light: #f2f2f2;
+        --color-accent: #fd5e62;
+      }
+
+      body {
+        margin: 0;
+        overscroll-behavior: none;
+        font-family: sans-serif;
+        color: var(--color-light);
+        background-color: var(--color-dark);
+      }
+
+      main {
+        padding: 0 20px;
+      }
+
+      :is(textarea, pre) {
+        margin: 0;
+        width: calc(50% - 4px);
+        min-height: 90vh;
+        color: var(--color-light);
+        background-color: #222;
+      }
+      code {
+        overflow-x: auto;
+      }
+
+      .Inputs {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .Button {
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>value-inspector</h1>
+
+      <section>
+        <button class="Button">Eval and stringify</button>
+        <div class="Inputs">
+          <textarea>
+{
+  primitiveNull: null,
+
+  valueNaN: NaN,
+  valueInfinity: Infinity,
+  valueGlobalThis: globalThis,
+  valueUndefined: undefined,
+
+  booleanTrue: true,
+  booleanFalse: false,
+
+  textString: "a string",
+  textRegExp: new RegExp("$ 🐈"),
+
+  numberZero: 0,
+  numberOne: 1,
+
+  obj: {
+    zero: 0,
+    one: { two: 2, three: { four: 4 } },
+  },
+  objInline: {
+    zero: 0,
+    one: 1,
+  },
+
+  fun() {},
+  functionArrow: () => {},
+  functionGenerator: function* () {}.constructor,
+
+  array: [0, 1],
+  arrayLong: Array.from({ length: 10 }, (_, i) => i),
+  arrayTwoD: Array.from({ length: 10 }, (_, i) => [i * 3, i * 3 + 1, i * 3 + 2]),
+  arrayTyped: Float32Array.of(0, 1),
+  arrayBuffer:  new ArrayBuffer(8),
+  // arrayBufferShared: new SharedArrayBuffer(8),
+  arrayDataView:  new DataView(new ArrayBuffer(8)),
+
+  error: new TypeError("Huhoh"),
+  date: new Date(),
+
+  bigInt: BigInt(0x1fffffffffffff),
+
+  collectionMap: new Map([
+    [0, "zero"],
+    [1, "one"],
+  ]),
+  collectionSet: new Set([0, 1]),
+  collectionWeakMap: new WeakMap(),
+  collectionWeakSet: new WeakSet(),
+
+  symbol: Symbol("foo"),
+  [Symbol("bar")]: "symbol-bar-value",
+
+  promise: Promise.resolve(),
+  proxy: new Proxy({ zero: 0 }, {}),
+}
+</textarea
+          >
+          <pre><code class="hljs language-javascript" readonly></code></pre>
+        </div>
+      </section>
+    </main>
+    <script async src="web_modules/es-module-shims.js" type="module"></script>
+    <script src="web_modules/import-map.json" type="importmap-shim"></script>
+
+    <script type="module-shim">
+      import inspect from "./index.js";
+      import hljs from "https://esm.run/@highlightjs/cdn-assets@11.9.0/es/highlight.min.js";
+      import javascript from "https://esm.run/@highlightjs/cdn-assets@11.9.0/es/languages/javascript.min.js";
+
+      const section = document.querySelector(`section`);
+
+      const buttonElement = section.querySelector(`button`);
+      const textareaElement = section.querySelector(`textarea`);
+      const outputElement = section.querySelector(`code`);
+
+      buttonElement.addEventListener("click", () => {
+        const value = eval("(" + textareaElement.value + ")");
+        value.circularArray = value.array;
+        value.circularObject = value;
+        const code = inspect(value, { depth: 2 });
+
+        console.log(code);
+        console.log(value);
+
+        outputElement.innerHTML = hljs.highlight(code, {
+          language: "javascript",
+        }).value;
+      });
+
+      hljs.registerLanguage("javascript", javascript);
+      globalThis.hljs = hljs;
+
+      buttonElement.click();
+    </script>
+  </body>
+</html>
