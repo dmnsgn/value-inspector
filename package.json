@@ -1,6 +1,6 @@
 {
   "name": "value-inspector",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Get a string representation of a value or an object. Pretty much like they look in Chrome DevTools.",
   "keywords": [
     "object",
