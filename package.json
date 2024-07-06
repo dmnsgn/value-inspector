@@ -1,6 +1,6 @@
 {
   "name": "value-inspector",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Get a string representation of a value or an object. Pretty much like they look in Chrome DevTools.",
   "keywords": [
     "object",
@@ -12,7 +12,10 @@
   ],
   "homepage": "https://github.com/dmnsgn/value-inspector",
   "bugs": "https://github.com/dmnsgn/value-inspector/issues",
-  "repository": "dmnsgn/value-inspector",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmnsgn/value-inspector.git"
+  },
   "funding": [
     {
       "type": "individual",
