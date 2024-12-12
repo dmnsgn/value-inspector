@@ -83,6 +83,7 @@
     zero: 0,
     one: 1,
   },
+  objNullProto: { __proto__: null },
 
   fun() {},
   functionArrow: () => {},
@@ -104,6 +105,7 @@
   collectionMap: new Map([
     [0, "zero"],
     [1, "one"],
+    [2, [0, 1]],
   ]),
   collectionSet: new Set([0, 1]),
   collectionWeakMap: new WeakMap(),
@@ -142,7 +144,7 @@
         const code = inspect(value, {
           depth: 2,
           stringLength: 14,
-          arrayLength: 5,
+          collectionLength: 5,
         });
 
         console.log(code);

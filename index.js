@@ -1,14 +1,18 @@
 import escapeStringRegexp from "escape-string-regexp";
 
-const objectPrototypeString = "[object Object]";
+const OBJECT_TYPES = ["WeakMap", "WeakSet", "Promise"];
+const STRUCTURED_TYPES = ["ArrayBuffer", "DataView"];
+const getPrototypeString = (type) => `[object ${type}]`;
+
 const TAB = "  ";
 const ELLIPSIS = "…";
 const indent = (string, count) =>
   string.replace(/^(?!\s*$)/gm, TAB.repeat(count));
+
 const truncate = (string, len) =>
   string.length > len ? `${string.substring(0, len)}${ELLIPSIS}` : string;
 const truncateArray = (array, len) =>
-  array.length > len ? array.slice(0, len).concat(ELLIPSIS) : array;
+  array.length > len ? [...array.slice(0, len), ELLIPSIS] : array;
 
 const isArrayLike = (value) =>
   Array.isArray(value) ||
@@ -34,13 +38,33 @@ ${truncateArray(
   .join(options.level > 1 ? `,\n${TAB}` : `\n`)}
 }`;
 
-const formatArrayType = ({ constructor, length }, showPrototype = false) =>
-  `${constructor.name === "Array" && !showPrototype ? "" : constructor.name}(${length})`;
+const formatCollectionType = (
+  { constructor, length, size },
+  showPrototype = false,
+) =>
+  `${constructor.name === "Array" && !showPrototype ? "" : constructor.name}(${length ?? size})`;
 
 const formatArray = (value, options) =>
-  `${formatArrayType(value)}[${truncateArray(value, options.arrayLength)
+  `${formatCollectionType(value)}[${truncateArray(
+    value,
+    options.collectionLength,
+  )
     .map((v) => format(v, options))
     .join(`, `)}]`;
+
+const formatIterable = (value, options, showKey) =>
+  `${formatCollectionType(value)} { ${truncateArray(
+    [...value],
+    options.collectionLength,
+  )
+    .map((v, i) =>
+      showKey
+        ? v === ELLIPSIS
+          ? ELLIPSIS
+          : `${i} => ${format(v, options)}`
+        : format(v, options),
+    )
+    .join(`, `)} }`;
 
 const format = (value, options) => {
   // Primitives
@@ -66,26 +90,47 @@ const format = (value, options) => {
     if (options.level < options.depth) {
       return formatArray(value, { ...options, level: options.level + 1 });
     }
-    return formatArrayType(value, true);
+    return formatCollectionType(value, true);
   }
 
-  // Objects
   const s = Object.prototype.toString.call(value);
-  if (s === objectPrototypeString) {
+
+  // Objects
+  if (s === getPrototypeString("Object")) {
     if (options.level > options.depth) return `{${ELLIPSIS}}`;
 
     if (options.circularRefs.has(value)) return `[Circular]`;
     options.circularRefs.add(value);
     return formatObject(value, { ...options, level: options.level + 1 });
   }
-  if (s === "[object WeakMap]") return "WeakMap {}";
-  if (s === "[object WeakSet]") return "WeakSet {}";
-  if (s === "[object RegExp]") return escapeStringRegexp(String(value));
-  if (s === "[object ArrayBuffer]") return `Arraybuffer(${value.byteLength})`;
-  if (s === "[object DataView]") return `DataView(${value.byteLength})`;
-  if (s === "[object Promise]") return `Promise {}`;
 
-  // Date, Error, Map, Set, Symbol
+  // Keyed collections
+  const isMap = s === getPrototypeString("Map");
+  if (isMap || s === getPrototypeString("Set")) {
+    if (options.level > options.depth) return formatCollectionType(value, true);
+
+    if (options.circularRefs.has(value)) return `[Circular]`;
+    options.circularRefs.add(value);
+    return formatIterable(
+      value,
+      { ...options, level: options.level + 1 },
+      isMap,
+    );
+  }
+
+  for (let i = 0; i < OBJECT_TYPES.length; i++) {
+    const type = OBJECT_TYPES[i];
+    if (s === getPrototypeString(type)) return `${type} {}`;
+  }
+  for (let i = 0; i < STRUCTURED_TYPES.length; i++) {
+    const type = STRUCTURED_TYPES[i];
+    if (s === getPrototypeString(type)) return `${type}(${value.byteLength})`;
+  }
+
+  if (s === getPrototypeString("RegExp"))
+    return escapeStringRegexp(String(value));
+
+  // Date, Error, Symbol
   return value?.toString?.() || s;
 };
 
@@ -93,7 +138,7 @@ const format = (value, options) => {
  * @typedef {object} Options
  * @property {number} [depth=2] Specify levels to expand arrays and objects.
  * @property {number} [stringLength=Number.POSITIVE_INFINITY] Length to truncate strings.
- * @property {number} [arrayLength=Number.POSITIVE_INFINITY] Length to slice arrays.
+ * @property {number} [collectionLength=Number.POSITIVE_INFINITY] Length to slice arrays.
  * @property {number} [objectLength=Number.POSITIVE_INFINITY] Length to truncate object keys.
  */
 
@@ -107,7 +152,7 @@ const inspect = (value, options = {}) =>
   format(value, {
     depth: 2,
     stringLength: Number.POSITIVE_INFINITY,
-    arrayLength: Number.POSITIVE_INFINITY,
+    collectionLength: Number.POSITIVE_INFINITY,
     objectLength: Number.POSITIVE_INFINITY,
     level: 0,
     circularRefs: new WeakSet(),
