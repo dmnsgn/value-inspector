@@ -138,7 +138,7 @@ const format = (value, options) => {
  * @typedef {object} Options
  * @property {number} [depth=2] Specify levels to expand arrays and objects.
  * @property {number} [stringLength=Number.POSITIVE_INFINITY] Length to truncate strings.
- * @property {number} [collectionLength=Number.POSITIVE_INFINITY] Length to slice arrays.
+ * @property {number} [collectionLength=Number.POSITIVE_INFINITY] Length to slice arrays, Map and Set.
  * @property {number} [objectLength=Number.POSITIVE_INFINITY] Length to truncate object keys.
  */
 
