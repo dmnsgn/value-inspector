@@ -132,9 +132,12 @@ Inspect a value.
 **Kind**: global typedef
 **Properties**
 
-| Name  | Type                | Description                                  |
-| ----- | ------------------- | -------------------------------------------- |
-| depth | <code>number</code> | Specify levels to expand arrays and objects. |
+| Name               | Type                | Default                               | Description                                  |
+| ------------------ | ------------------- | ------------------------------------- | -------------------------------------------- |
+| [depth]            | <code>number</code> | <code>2</code>                        | Specify levels to expand arrays and objects. |
+| [stringLength]     | <code>number</code> | <code>Number.POSITIVE_INFINITY</code> | Length to truncate strings.                  |
+| [collectionLength] | <code>number</code> | <code>Number.POSITIVE_INFINITY</code> | Length to slice arrays, Map and Set.         |
+| [objectLength]     | <code>number</code> | <code>Number.POSITIVE_INFINITY</code> | Length to truncate object keys.              |
 
 <!-- api-end -->
 
