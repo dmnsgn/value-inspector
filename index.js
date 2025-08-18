@@ -1,4 +1,5 @@
 import escapeStringRegexp from "escape-string-regexp";
+import { truncate } from "string-truncate";
 
 const OBJECT_TYPES = ["WeakMap", "WeakSet", "Promise"];
 const STRUCTURED_TYPES = ["ArrayBuffer", "DataView"];
@@ -9,8 +10,6 @@ const ELLIPSIS = "…";
 const indent = (string, count) =>
   string.replace(/^(?!\s*$)/gm, TAB.repeat(count));
 
-const truncate = (string, len) =>
-  string.length > len ? `${string.substring(0, len)}${ELLIPSIS}` : string;
 const truncateArray = (array, len) =>
   array.length > len ? [...array.slice(0, len), ELLIPSIS] : array;
 
