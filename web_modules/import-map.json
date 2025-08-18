@@ -3,6 +3,8 @@
     "es-module-shims": "./es-module-shims.js",
     "es-module-shims/debug": "./es-module-shims/debug.js",
     "es-module-shims/wasm": "./es-module-shims/wasm.js",
-    "escape-string-regexp": "./escape-string-regexp.js"
+    "es-module-shims/typescript-transform": "./es-module-shims/typescript-transform.js",
+    "escape-string-regexp": "./escape-string-regexp.js",
+    "string-truncate": "./string-truncate.js"
   }
 }
